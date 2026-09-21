@@ -3,7 +3,7 @@
 #   python quem-falou.py audio16k.wav                 -> trechos "inicio fim Pessoa N"
 #   python quem-falou.py audio16k.wav legenda.srt     -> transcricao "[mm:ss] Pessoa N: texto"
 #   --pessoas N   quando se sabe quantas pessoas falaram (acerta mais); sem ele, estima.
-#   --nomes "Artur,Paciente"   troca Pessoa 1/2 pelos nomes, na ordem em que cada um fala primeiro.
+#   --nomes "Ana,Paciente"   troca Pessoa 1/2 pelos nomes, na ordem em que cada um fala primeiro.
 # O audio precisa estar em WAV 16 kHz mono (o transcrever-audio.ps1 ja converte com o ffmpeg).
 # Nada e gravado: o resultado sai no stdout e quem chama decide onde salvar (audio de consulta e dado de saude).
 import os, re, sys, wave
@@ -87,7 +87,7 @@ def mmss(s):
 
 
 def nome_pessoa(n, nomes):
-    """--nomes "Artur,Paciente" troca Pessoa 1 e Pessoa 2; sem nome para aquele numero, fica Pessoa N."""
+    """--nomes "Ana,Paciente" troca Pessoa 1 e Pessoa 2; sem nome para aquele numero, fica Pessoa N."""
     return nomes[n - 1] if 0 < n <= len(nomes) and nomes[n - 1] else f"Pessoa {n}"
 
 

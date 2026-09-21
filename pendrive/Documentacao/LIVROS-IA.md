@@ -81,7 +81,7 @@ as outras 255 têm o mesmo título e conteúdo diferente (edições, PLR com nom
 material. O barulho na busca já é resolvido pelo limite de 2 trechos por título.
 
 ## Nomes de quem falou e opção no menu — 19/09
-- `transcrever-audio.ps1 -QuemFalou -Nomes "Artur,Sr. Jose"` (e `consulta.ps1 -Nomes ...`) troca
+- `transcrever-audio.ps1 -QuemFalou -Nomes "usuario,Sr. Jose"` (e `consulta.ps1 -Nomes ...`) troca
   "Pessoa 1/2" pelos nomes, na ordem em que cada um fala primeiro. Sem `-Nomes`, fica Pessoa N.
 - Menu: **tecla Q, "Perguntar aos livros"** — chama `ia.ps1 -l`, a IA responde citando o livro.
 - `quem-falou.py` com arquivo que não existe agora diz isso, em vez de mostrar erro técnico.
