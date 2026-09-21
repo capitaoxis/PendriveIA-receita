@@ -1,0 +1,13 @@
+# Sem isto, com core.autocrlf=true o git grava CRLF DENTRO do repositorio e os .sh quebram no Linux
+# ("$'\r': command not found"). Medido em 21/09/2026 noutro repositorio desta maquina.
+* text=auto eol=lf
+*.sh text eol=lf
+*.py text eol=lf
+*.mjs text eol=lf
+*.md text eol=lf
+*.tsv text eol=lf
+*.ps1 text eol=crlf
+*.bat text eol=crlf
+*.cmd text eol=crlf
+*.onnx binary
+*.gguf binary
