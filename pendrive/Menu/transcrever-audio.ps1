@@ -4,7 +4,7 @@
 # Usa o Whisper large-v3-turbo do Studio: na placa NVIDIA quando houver, senao no processador.
 # O texto fica ao lado do arquivo original (mesmo nome, .txt).
 # -QuemFalou separa as vozes ("[00:14] Pessoa 2: ...") com Menu\quem-falou.py; -Pessoas N quando se sabe quantas.
-# -Nomes "Ana,Paciente" troca Pessoa 1/2 pelos nomes, na ordem em que cada um fala primeiro.
+# -Nomes "Artur,Paciente" troca Pessoa 1/2 pelos nomes, na ordem em que cada um fala primeiro.
 param([string]$Arquivo = "", [string]$Idioma = "pt", [switch]$ComHorarios, [switch]$QuemFalou, [int]$Pessoas = 0,
       [string]$Nomes = "")
 $ErrorActionPreference = "Stop"

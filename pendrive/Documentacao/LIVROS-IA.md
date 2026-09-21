@@ -81,7 +81,7 @@ as outras 255 têm o mesmo título e conteúdo diferente (edições, PLR com nom
 material. O barulho na busca já é resolvido pelo limite de 2 trechos por título.
 
 ## Nomes de quem falou e opção no menu — 19/09
-- `transcrever-audio.ps1 -QuemFalou -Nomes "Ana,Paciente"` (e `consulta.ps1 -Nomes ...`) troca
+- `transcrever-audio.ps1 -QuemFalou -Nomes "Artur,Sr. Jose"` (e `consulta.ps1 -Nomes ...`) troca
   "Pessoa 1/2" pelos nomes, na ordem em que cada um fala primeiro. Sem `-Nomes`, fica Pessoa N.
 - Menu: **tecla Q, "Perguntar aos livros"** — chama `ia.ps1 -l`, a IA responde citando o livro.
 - `quem-falou.py` com arquivo que não existe agora diz isso, em vez de mostrar erro técnico.
@@ -97,3 +97,9 @@ material. O barulho na busca já é resolvido pelo limite de 2 trechos por títu
 - Nome do livro na citação: passou a limpar `.epub` (faltava), título de digitalização ("Impressão de foto
   de página inteira") e escape de PDF (`\343`); autor com nome de arquivo ou com mais de 45 letras é
   descartado. "\(Impress\343o...\)" virou *HALL, Stuart. A Identidade Cultural na Pós-Modernidade*.
+
+## 21/09: título do livro pesa na ordem — 20/20
+Livro cujo **título** fala do assunto passou a vir na frente (entre os trechos que são texto corrido).
+Placar: **20/20 achando o livro certo, 18/20 já no 1º trecho** (era 19/20 e 17/20), com os controles
+ainda em 0/2 inventando fonte. O caso que faltava era "exercícios de fortalecimento muscular", que
+trazia um gabarito de prova antes do livro de exercício.

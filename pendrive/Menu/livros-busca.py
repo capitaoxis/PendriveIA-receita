@@ -251,7 +251,15 @@ def buscar(pergunta, n=6):
         simbolos = sum(c.isdigit() or c in "[]|()/%:;" for c in t) / max(len(t), 1)
         ligacao = sum(p in LIGACAO for p in pal) / len(pal)
         return simbolos < 0.10 and ligacao > 0.10
-    linhas = [l for l in linhas if prosa(l[1])] + [l for l in linhas if not prosa(l[1])]
+    # livro cujo TITULO fala do assunto vem antes: "exercicios de fortalecimento muscular" trazia
+    # gabarito de prova na frente do livro de exercicio. Ordem: titulo casa E e prosa > prosa > resto.
+    def tituloCasa(lid):
+        dados = info.get(lid)
+        if not dados:
+            return False
+        titulo = (dados[0] or "").lower()
+        return any(radical(p) in titulo for p in palavras)
+    linhas = sorted(linhas, key=lambda l: (not (tituloCasa(l[0]) and prosa(l[1])), not prosa(l[1])))
     achados, por_livro, vistos = [], {}, set()
     for lid, texto in linhas:  # no maximo 2 trechos por livro
         if texto in vistos or not info.get(lid):

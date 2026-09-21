@@ -167,7 +167,7 @@ function Start-Cmd {
 }
 
 # Tela do menu por grupos. Tecla, texto e o arquivo que precisa existir (vazio = sempre mostra).
-# As teclas antigas NÃO mudam: o usuario já as decorou.
+# As teclas antigas NÃO mudam: o Artur já as decorou.
 $grupos = @(
     @{ Nome = "Conversar e criar"; Itens = @(
         @("1", "Conversar com a IA (Studio, já com o modelo recomendado)", "Studio\windows.bat"),

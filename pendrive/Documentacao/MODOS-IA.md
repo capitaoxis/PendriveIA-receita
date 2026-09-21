@@ -96,3 +96,38 @@ Recomendacao pratica:
 - Em PC sem placa (Qwen3-1.7B): use `relatorio`, `ideia`, `mestrado` e `laudo`; **evite o `curto`** e
   desconfie do `codar`, que cai para 1/3. Para pergunta de fato (data, nome, comando), prefira sem modo.
 - Rodar o medidor em outro PC: `python Testesvaliar-modos.py --modelo <arquivo .gguf>`.
+
+## 21/09 (tarde): 17/18 no 8B e 15/18 no leve — e tres defeitos do MEDIDOR
+
+Placar com temperatura 0 (determinístico), 18 casos + 2 controles:
+
+| Modo | 8B (com placa) | 1.7B (sem placa) |
+|---|---|---|
+| codar | **3/3** | **3/3** |
+| relatorio | **3/3** | 2/3 |
+| ideia | **3/3** | **3/3** |
+| mestrado | 2/3 | **3/3** |
+| laudo | **3/3** | 2/3 |
+| curto | **3/3** | 2/3 |
+| **total** | **17/18** (sem modo: 4/18) | **15/18** (sem modo: 3/18) |
+
+### O que melhorou nos modos
+- **`codar` (1/3 → 3/3 no leve):** trocar "Formato: CAUSA / CORRECAO / COMO CONFERIR" por **três linhas
+  literais** que o modelo copia. Ao fazer isso, o 8B parou de escrever a linha corrigida do código —
+  consertado exigindo "se o usuario MOSTROU o codigo, escreva a linha ja corrigida". Resposta do 8B
+  caiu de 436 para **118 letras** com o mesmo acerto.
+- **`laudo` (0/3 → 3/3 no 8B):** encurtado de 231 para 155 palavras, com as regras duras **primeiro**
+  (envio/LGPD, nome, promessa). Modelo fraco obedece o começo e ignora o fim: a versão longa levou o
+  1.7B de 2/3 para 0/3.
+- **`mestrado`:** proibida a citação `(AUTOR, ano)` que não veio do material; toda afirmação de fato
+  termina com `[referencia a buscar: <assunto>]`.
+
+### Três defeitos que eram do MEDIDOR, não dos modos
+1. **Comparava sem acento:** procurava "nao medido" e a IA respondia "não medido" — resposta certa
+   reprovada. Agora a conferência tira acento dos dois lados.
+2. **Temperatura 0,3:** o placar variava entre execuções, e dava para "melhorar" um modo só rodando de
+   novo até dar sorte. Agora é **temperatura 0**.
+3. **Exigia ver "J.S." ou "código":** o 8B simplesmente **não escreveu o nome do paciente**, que é o
+   comportamento certo, e era reprovado. Agora o teste cobra o que importa: o nome **não pode aparecer**.
+
+Moral: quando o placar não bate com a leitura das respostas, **desconfie do medidor antes do modo**.

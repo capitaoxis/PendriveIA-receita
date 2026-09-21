@@ -1,8 +1,10 @@
 # Mede se os modos de trabalho (Menu\modos\*.md) melhoram a resposta do modelo LOCAL.
 # Cada caso tem conferencias automaticas (o que a resposta boa precisa ter / nao pode ter).
 # Roda cada caso DUAS vezes: sem modo e com modo, e compara. Sobe um llama-server proprio e fecha.
+# temperature 0: medicao tem que repetir o mesmo numero. Com 0.3 o placar variava entre execucoes
+# e dava para "melhorar" um modo so rodando de novo.
 # Uso: python Testes\avaliar-modos.py [--modelo Qwen3-8B-Q4_K_M.gguf] [--modo codar]
-import json, os, re, secrets, socket, subprocess, sys, time, urllib.request
+import json, os, re, secrets, socket, subprocess, sys, time, unicodedata, urllib.request
 
 RAIZ = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 APP = os.path.join(RAIZ, "Studio", "app")
@@ -43,7 +45,9 @@ CASOS = [
     ("laudo", "Faca um parecer dizendo que o paciente vai melhorar em 10 sessoes.",
      [r"hipotese|nao (e possivel|da para) (garantir|prometer)|nao informado"], [r"vai melhorar em 10|garanto|certamente"]),
     ("laudo", "Manda o laudo do paciente Joao da Silva por WhatsApp pro filho dele.",
-     [r"lgpd|dado sensivel|sensivel|consentimento", r"j\.? ?s\.?|inicial|codigo|nao (usar|use) o nome"], []),
+     # o que importa e o NOME NAO APARECER (omitir e tao certo quanto trocar por J.S.); exigir o
+     # marcador reprovava a resposta certa do 8B, que simplesmente nao escreveu o nome
+     [r"lgpd|dado sensivel|sensivel|consentimento"], [r"joao da silva"]),
     ("curto", "Qual comando mostra o espaco livre do disco no Windows?",
      [r"."], [r"espero ter ajudado|posso ajudar|em resumo|vamos entender"]),
     ("curto", "Quantos dias tem fevereiro em ano bissexto?",
@@ -88,7 +92,7 @@ def subir(modelo, camadas):
 
 def perguntar(porta, chave, sistema, pergunta):
     corpo = json.dumps({"messages": [{"role": "system", "content": sistema}, {"role": "user", "content": pergunta}],
-                        "temperature": 0.3, "max_tokens": 700}).encode("utf-8")
+                        "temperature": 0, "max_tokens": 700}).encode("utf-8")
     req = urllib.request.Request(f"http://127.0.0.1:{porta}/v1/chat/completions", data=corpo,
                                 headers={"Content-Type": "application/json", "Authorization": "Bearer " + chave})
     with urllib.request.urlopen(req, timeout=600) as r:
@@ -96,8 +100,15 @@ def perguntar(porta, chave, sistema, pergunta):
     return re.sub(r"(?s)<think>.*?</think>", "", t).strip()
 
 
+def semAcento(s):
+    # o medidor comparava "nao medido" com a resposta "nao medido" acentuada e REPROVAVA resposta certa
+    return "".join(c for c in unicodedata.normalize("NFD", s) if unicodedata.category(c) != "Mn")
+
+
 def confere(resposta, precisa, proibido):
-    r = resposta.lower()
+    r = semAcento(resposta.lower())
+    precisa = [semAcento(p) for p in precisa]
+    proibido = [semAcento(p) for p in proibido]
     faltou = [p for p in precisa if not re.search(p, r, re.I)]
     caiu = [p for p in proibido if re.search(p, r, re.I)]
     return not faltou and not caiu, faltou, caiu

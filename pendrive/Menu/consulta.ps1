@@ -5,7 +5,7 @@
 #      consulta.ps1 -Gravar -Minutos 20  (grava ate 20 min; 'q' para antes)
 #      -Pessoas N  quantas pessoas falam (sem ele, pergunta; Enter = descobre sozinho)
 #      -SemSeparar transcricao corrida, sem "Pessoa 1/2"
-#      -Nomes "Ana,Paciente"  nome no lugar de Pessoa 1/2 (ordem em que cada um fala primeiro)
+#      -Nomes "Artur,Paciente"  nome no lugar de Pessoa 1/2 (ordem em que cada um fala primeiro)
 param([string]$Arquivo = "", [switch]$Gravar, [int]$Minutos = 0, [string]$Microfone = "", [string]$Modelo = "",
       [int]$Pessoas = -1, [switch]$SemSeparar, [string]$Nomes = "")
 $ErrorActionPreference = "Stop"
