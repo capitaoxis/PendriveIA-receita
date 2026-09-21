@@ -52,14 +52,14 @@ pacote npm global). A execução do agente em si foi **bloqueada pelo ambiente**
 ("criar agente não confiável"), então o que está provado é a parte do modelo — que era a parte
 incerta. Rodar o agente de ponta a ponta depende de liberar essa permissão.
 
-## O que fizemos no lugar: `Menugente.py` (21/09/2026)
+## O que fizemos no lugar: `Menu\agente.py` (21/09/2026)
 
 O openclaude diagnosticava e não consertava. Como o ciclo de ferramenta com o modelo local já estava
 provado, escrevemos o nosso: **um arquivo, 230 linhas, sem Node, sem 300 MB**.
 
 ```powershell
-python Menugente.py --pasta C:\meu\projeto --testar "python rodar-testes.py" "conserte o que falha"
-python Menugente.py --pasta C:\meu\projeto --desfazer      # devolve tudo ao estado anterior
+python Menu\agente.py --pasta C:\meu\projeto --testar "python rodar-testes.py" "conserte o que falha"
+python Menu\agente.py --pasta C:\meu\projeto --desfazer      # devolve tudo ao estado anterior
 ```
 Opções: `--voltas N` (teto), `--mostrar` (diff do que mudou), `--modelo <gguf>`, `--porta` (servidor já no ar).
 
