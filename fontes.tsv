@@ -1,0 +1,45 @@
+grupo	nome	destino	origem	verificacao	tamanho_aprox	licenca
+modelo	Qwen3-8B-Q4_K_M.gguf	Studio\app\llm-models	hf:unsloth/Qwen3-8B-GGUF/Qwen3-8B-Q4_K_M.gguf	hf-api-sha256	5.0 GB	Apache-2.0
+modelo	Qwen3-1.7B-Q4_K_M.gguf	Studio\app\llm-models	hf:unsloth/Qwen3-1.7B-GGUF/Qwen3-1.7B-Q4_K_M.gguf	hf-api-sha256	1.1 GB	Apache-2.0
+modelo	Qwen3-14B-Q4_K_M.gguf	Studio\app\llm-models	hf:unsloth/Qwen3-14B-GGUF/Qwen3-14B-Q4_K_M.gguf	hf-api-sha256	8.4 GB	Apache-2.0
+modelo	Qwen3.5-4B-Q4_K_M.gguf	Studio\app\llm-models	hf:unsloth/Qwen3.5-4B-GGUF/Qwen3.5-4B-Q4_K_M.gguf	hf-api-sha256	2.5 GB	Apache-2.0
+modelo	Qwen3.5-4B-mmproj-F16.gguf	Studio\app\llm-models	hf:unsloth/Qwen3.5-4B-GGUF/mmproj-F16.gguf	hf-api-sha256	1.2 GB	Apache-2.0
+modelo	qwen2.5-coder-7b-instruct-q4_k_m.gguf	Studio\app\llm-models	hf:Qwen/Qwen2.5-Coder-7B-Instruct-GGUF/qwen2.5-coder-7b-instruct-q4_k_m.gguf	hf-api-sha256	4.7 GB	Apache-2.0
+modelo	medgemma-1.5-4b-it-Q4_K_M.gguf	Studio\app\llm-models	hf:unsloth/medgemma-1.5-4b-it-GGUF/medgemma-1.5-4b-it-Q4_K_M.gguf	hf-api-sha256	2.5 GB	HAI-DEF (uso proibido: ver Licencas)
+voz	ggml-large-v3-turbo-q5_0.bin	Studio\app\speech-models	hf:ggerganov/whisper.cpp/ggml-large-v3-turbo-q5_0.bin	hf-api-sha256	0.6 GB	MIT
+voz	pt_BR-cadu-medium (onnx+json)	Studio\app\tts-models\piper	hf:rhasspy/piper-voices/pt/pt_BR/cadu/medium/pt_BR-cadu-medium.onnx	hf-api-sha256	63 MB	MIT
+voz	pt_BR-faber-medium (onnx+json)	Studio\app\tts-models\piper	hf:rhasspy/piper-voices/pt/pt_BR/faber/medium/pt_BR-faber-medium.onnx	hf-api-sha256	63 MB	MIT
+voz	pt_BR-jeff-medium (onnx+json)	Studio\app\tts-models\piper	hf:rhasspy/piper-voices/pt/pt_BR/jeff/medium/pt_BR-jeff-medium.onnx	hf-api-sha256	63 MB	MIT
+separar-voz	sherpa-onnx-pyannote-segmentation-3-0	Ferramentas\diarizacao	https://github.com/k2-fsa/sherpa-onnx/releases/download/speaker-segmentation-models/sherpa-onnx-pyannote-segmentation-3-0.tar.bz2	sha256-fixo:220ad67ca923bef2fa91f2390c786097bf305bceb5e261d4af67b38e938e1079:model.onnx	6 MB	MIT (modelo: pyannote, CC-BY)
+separar-voz	3dspeaker eres2net base 16k (voz.onnx)	Ferramentas\diarizacao\voz.onnx	https://github.com/k2-fsa/sherpa-onnx/releases/download/speaker-recongition-models/3dspeaker_speech_eres2net_base_sv_zh-cn_3dspeaker_16k.onnx	sha256-fixo:1a331345f04805badbb495c775a6ddffcdd1a732567d5ec8b3d5749e3c7a5e4b	40 MB	Apache-2.0
+acervo	wikipedia_pt_all_maxi	Kiwix\zim	kiwix:wikipedia	kiwix-sha256	40 GB	CC-BY-SA
+acervo	wikisource_pt_all_maxi	Kiwix\zim	kiwix:wikisource	kiwix-sha256	5 GB	CC-BY-SA
+acervo	wikipedia_en_medicine_maxi	Kiwix\zim	kiwix:wikipedia	kiwix-sha256	9 GB	CC-BY-SA
+acervo	pt.stackoverflow.com_mul_all	Kiwix\zim	kiwix:stack_exchange	kiwix-sha256	1 GB	CC-BY-SA
+acervo	wiktionary_pt_all_nopic	Kiwix\zim	kiwix:wiktionary	kiwix-sha256	1 GB	CC-BY-SA
+acervo	wikipedia_pt_medicine_nopic	Kiwix\zim	kiwix:wikipedia	kiwix-sha256	0.3 GB	CC-BY-SA
+acervo	devdocs (12 arquivos: python, javascript, typescript, react, node, postgresql, docker, bash, git, nextjs, html, css)	Kiwix\zim	kiwix:devdocs	kiwix-sha256	1 GB	varia por documentacao
+programa	Kiwix (kiwix-tools, serve os .zim)	Kiwix	https://download.kiwix.org/release/kiwix-tools/	sha256-registra	20 MB	GPL-3.0
+programa	7-Zip (portatil)	Ferramentas\7-Zip	https://www.7-zip.org/download.html	sha256-registra	5 MB	LGPL
+programa	Calibre Portable (biblioteca + pdftotext/pdftoppm)	Ferramentas\Calibre Portable	https://calibre-ebook.com/download_portable	sha256-registra	400 MB	GPL-3.0
+programa	NAPS2 (traz o Tesseract com portugues, usado no OCR)	Ferramentas\NAPS2	https://www.naps2.com/download	sha256-registra	200 MB	GPL-2.0 (Tesseract: Apache-2.0)
+programa	LibreOffice Portable	Ferramentas\LibreOffice	https://www.libreoffice.org/download/portable-versions/	sha256-registra	700 MB	MPL-2.0
+programa	Anki	Ferramentas\Anki	https://apps.ankiweb.net/	sha256-registra	200 MB	AGPL-3.0
+programa	Zotero	Ferramentas\Zotero	https://www.zotero.org/download/	sha256-registra	300 MB	AGPL-3.0
+programa	JASP	Ferramentas\JASP	https://jasp-stats.org/download/	sha256-registra	1.5 GB	AGPL-3.0
+programa	KeePassXC	Ferramentas\KeePassXC	https://keepassxc.org/download/	sha256-registra	80 MB	GPL-2.0
+programa	draw.io Desktop	Ferramentas\drawio	https://github.com/jgraph/drawio-desktop/releases	sha256-registra	100 MB	Apache-2.0
+programa	SumatraPDF (portatil)	Ferramentas\SumatraPDF	https://www.sumatrapdfreader.org/download-free-pdf-viewer	sha256-registra	10 MB	GPL-3.0
+programa	PDF Arranger	Ferramentas\PDFArranger	https://github.com/pdfarranger/pdfarranger/releases	sha256-registra	60 MB	GPL-3.0
+programa	R (portatil) + pacotes epiR, epitools, meta, ggplot2	Ferramentas\R	https://cran.r-project.org/bin/windows/base/	sha256-registra	1 GB	GPL-2.0
+programa	Epi Info 7	Ferramentas\EpiInfo7	https://www.cdc.gov/epiinfo/support/downloads.html	sha256-registra	300 MB	dominio publico (CDC)
+programa	Python 3.12 embeddable (roda os scripts)	Python\python312	https://www.python.org/downloads/windows/	sha256-registra	85 MB	PSF
+programa	PortableGit	Ferramentas\git	https://github.com/git-for-windows/git/releases	sha256-registra	385 MB	GPL-2.0
+motor	llama.cpp (llama-server, cpu/cuda/vulkan)	Studio\app\llm-backend\win	https://github.com/ggml-org/llama.cpp/releases	sha256-registra	300 MB	MIT
+motor	whisper.cpp (whisper-cli, cpu/cuda)	AnythingLLM\whisper	https://github.com/ggml-org/whisper.cpp/releases	sha256-registra	100 MB	MIT
+motor	ffmpeg LGPL (converte audio da transcricao)	AnythingLLM\dados\storage\engines\ffmpeg\windows-x64	https://www.gyan.dev/ffmpeg/builds/	sha256-registra	80 MB	LGPL-2.1
+aplicativo	AnythingLLM Desktop (os "Documentos")	AnythingLLM	https://anythingllm.com/desktop	sha256-registra	600 MB	MIT
+aplicativo	Studio (interface de chat/imagem/voz)	Studio	ver README: o Studio e um aplicativo de terceiro, com correcoes nossas por cima	sha256-registra	1 GB	do fabricante
+pacote-python	openzim-mcp, sherpa-onnx, mcp, numpy, piper-tts	Python\python312	pip (PyPI, o pip confere o hash de cada pacote)	pip	300 MB	varia
+NAO-DISTRIBUIVEL	Livros (kit saude, guias, best-sellers)	Ferramentas\Calibre Portable\Calibre Library	cada um traz os seus	-	-	direito autoral: uso pessoal
+NAO-DISTRIBUIVEL	Dados pessoais (consultas, atendimentos, cofre, senhas)	Documentos, Pasta de atendimentos	nunca sai do pendrive de quem usa	-	-	dado sensivel (LGPD)
