@@ -51,3 +51,43 @@ openclaude --print "rode X, ache a causa, corrija e prove com o teste"
 pacote npm global). A execução do agente em si foi **bloqueada pelo ambiente** do Claude Code
 ("criar agente não confiável"), então o que está provado é a parte do modelo — que era a parte
 incerta. Rodar o agente de ponta a ponta depende de liberar essa permissão.
+
+## O que fizemos no lugar: `Menugente.py` (21/09/2026)
+
+O openclaude diagnosticava e não consertava. Como o ciclo de ferramenta com o modelo local já estava
+provado, escrevemos o nosso: **um arquivo, 230 linhas, sem Node, sem 300 MB**.
+
+```powershell
+python Menugente.py --pasta C:\meu\projeto --testar "python rodar-testes.py" "conserte o que falha"
+python Menugente.py --pasta C:\meu\projeto --desfazer      # devolve tudo ao estado anterior
+```
+Opções: `--voltas N` (teto), `--mostrar` (diff do que mudou), `--modelo <gguf>`, `--porta` (servidor já no ar).
+
+### Medido nos quatro testes
+
+| Teste | Resultado |
+|---|---|
+| Defeito simples (`return a - b`) | ✅ consertou e provou em **9 s**; não tocou na função correta |
+| Defeito em **dois** arquivos | ✅ consertou os dois em **14 s** |
+| Tarefa **impossível** (teste contraditório) | ✅ **não** declara sucesso falso: volta ao trabalho e termina vermelho, com código de saída 1 |
+| Tentar **sair da pasta** | ✅ ler/escrever recusados; comando de terminal recusado depois do conserto |
+| **Modelo leve** (1.7B, PC sem placa) | ❌ **não funciona**: gravou 578 letras de lixo e nunca resolveu |
+
+### As quatro coisas que a medição obrigou a construir
+
+1. **A palavra do agente não vale.** Em 2 dos 4 testes ele disse "PRONTO" sem ter resolvido. Hoje,
+   quando ele diz que acabou, o agente **roda o teste, devolve o erro e manda continuar**; e no fim
+   confere por fora. Sem `--testar`, você fica na palavra dele — use sempre.
+2. **Listar os arquivos no pedido.** Sem isso ele chutava `src/conta.py` e queimava 3 voltas.
+3. **Avisar o que ele acrescentou.** Mesmo proibido, ele cria função sem uso. A ferramenta compara com
+   a cópia `.antes` e **lista as definições novas** no fim: quem decide manter é você.
+4. **Traduzir `python3` para `python`**, que o modelo insiste em pedir no Windows.
+
+### O que NÃO é
+
+**Não é caixa de areia.** A trava de pasta vale para ler e escrever; no terminal é **quebra-mola**
+(recusa `..`, caminhos do Windows, `curl` e afins). Quem roda o agente roda com a sua conta: aponte
+`--pasta` só para projeto que você deixaria um script solto, e prefira pasta com git.
+
+**Não serve em PC sem placa de vídeo.** Com o 1.7B ele estraga o arquivo em vez de consertar. Se o menu
+disser perfil "Sem placa", use `ia -modo codar` (que conversa) em vez do agente.
