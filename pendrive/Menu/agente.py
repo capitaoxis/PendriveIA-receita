@@ -132,7 +132,7 @@ def main():
     ap.add_argument("--testar", default="")
     ap.add_argument("--voltas", type=int, default=10)
     ap.add_argument("--porta", type=int, default=0)
-    ap.add_argument("--modelo", default="Qwen3-8B-Q4_K_M.gguf")
+    ap.add_argument("--modelo", default="unsloth--Qwen3.5-4B-GGUF--Qwen3.5-4B-Q4_K_M.gguf")   # medido 21/09: 4 s e sem lixo; o 8B leva 9-14 s e cria funcao sem uso
     ap.add_argument("--desfazer", action="store_true")
     ap.add_argument("--mostrar", action="store_true")
     a = ap.parse_args()

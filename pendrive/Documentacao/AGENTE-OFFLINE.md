@@ -71,7 +71,8 @@ Opções: `--voltas N` (teto), `--mostrar` (diff do que mudou), `--modelo <gguf>
 | Defeito em **dois** arquivos | ✅ consertou os dois em **14 s** |
 | Tarefa **impossível** (teste contraditório) | ✅ **não** declara sucesso falso: volta ao trabalho e termina vermelho, com código de saída 1 |
 | Tentar **sair da pasta** | ✅ ler/escrever recusados; comando de terminal recusado depois do conserto |
-| **Modelo leve** (1.7B, PC sem placa) | ❌ **não funciona**: gravou 578 letras de lixo e nunca resolveu |
+| **Qwen3.5-4B** (o de PC sem placa) | ✅ **melhor de todos**: os dois casos em **4 s**, correção limpa, sem acrescentar nada |
+| **Qwen3-1.7B** (o mais leve) | ❌ não funciona: gravou 578 letras de lixo e nunca resolveu |
 
 ### As quatro coisas que a medição obrigou a construir
 
@@ -89,5 +90,7 @@ Opções: `--voltas N` (teto), `--mostrar` (diff do que mudou), `--modelo <gguf>
 (recusa `..`, caminhos do Windows, `curl` e afins). Quem roda o agente roda com a sua conta: aponte
 `--pasta` só para projeto que você deixaria um script solto, e prefira pasta com git.
 
-**Não serve em PC sem placa de vídeo.** Com o 1.7B ele estraga o arquivo em vez de consertar. Se o menu
-disser perfil "Sem placa", use `ia -modo codar` (que conversa) em vez do agente.
+**Qual modelo usar:** o **Qwen3.5-4B** é o melhor para o agente — mais rápido (4 s) e mais limpo que o
+8B, que insiste em criar função sem uso. O **1.7B não serve**: estraga o arquivo. Ressalva medida: os 4 s
+são **com placa de vídeo**; em PC sem placa o mesmo 4B roda a ~6 tokens/s, então espere minutos em vez de
+segundos — funciona, mas com paciência.

@@ -188,6 +188,7 @@ $grupos = @(
     @{ Nome = "Programar"; Itens = @(
         @("I", "IA no terminal (ia, codar, git, python, npm)", "ATIVAR-IA.cmd"),
         @("X", "Codar: programar com a IA (abre nos Documentos)", "codar.cmd"),
+        @("G", "Agente: a IA conserta o codigo de uma pasta e prova com o teste", "Menu\agente.py"),
         @("V", "Servidor de IA para VS Code/aider (127.0.0.1:11480)", "IA-SERVIDOR.cmd")) },
     @{ Nome = "Ferramentas"; Itens = @(
         @("O", "Textos, planilhas e slides (LibreOffice)", ""),
@@ -268,6 +269,17 @@ function Invoke-Opcao($escolha) {
         "K" { Start-Cmd "CONSULTA.cmd" }
         "E" { Start-Cmd "ESTUDO.cmd" }
         "X" { Start-Cmd "codar.cmd" -Pasta ([Environment]::GetFolderPath("MyDocuments")) }
+        "G" {
+            $pasta = Read-Host "  Pasta do projeto (o agente NAO sai dela; prefira pasta com git)"
+            if (-not (Test-Path -LiteralPath $pasta)) { Write-Linha "  Pasta nao existe." Red; break }
+            $teste = Read-Host "  Comando de teste que prova o conserto (ex.: python -m pytest -q)"
+            $tarefa = Read-Host "  O que consertar (Enter = o que faz o teste falhar)"
+            if (-not $tarefa) { $tarefa = "conserte o que faz o teste falhar" }
+            $py = Join-Path $root "Python\python312\python.exe"
+            $env:PYTHONIOENCODING = "utf-8"
+            & $py (Join-Path $PSScriptRoot "agente.py") --pasta $pasta --testar $teste --mostrar $tarefa
+            Write-Linha "  Desfazer tudo: python Menu\agente.py --pasta `"$pasta`" --desfazer" DarkGray
+        }
         "V" { Start-Cmd "IA-SERVIDOR.cmd" }
         "F" { Start-Cmd "COFRE.cmd" }
         "B" { Start-Cmd "ATUALIZAR.cmd" }
