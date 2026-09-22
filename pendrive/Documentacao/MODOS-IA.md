@@ -179,3 +179,25 @@ O molde virou formulário para preencher, não caminho para pensar. Duas liçõe
 
 E isso só apareceu porque **todo modo é medido contra "sem modo"**. Comparado com a minha expectativa, o
 modo parecia ótimo: curto, organizado, no formato pedido. Contra o controle, era uma piora.
+
+
+## Regressão completa dos 9 modos, 22/09/2026 (o número que fecha o dia)
+
+Os 27 casos (3 por modo), cada um **sem e com o modo**, nos dois modelos, com os 4 controles de
+paráfrase aceitos e o servidor conferido em 0 no fim:
+
+| modelo | sem modo | com modo |
+|---|---|---|
+| Qwen3.5-4B (PC sem placa) | 10/27 | **27/27** |
+| Qwen3-8B | 9/27 | **26/27** |
+
+O único que não fecha é o `mestrado` no 8B (2/3) - e ele já era 2/3 antes dos modos novos, então
+**nenhum modo antigo regrediu** com a entrada do `revisar`, do `commit` e do `investigar`.
+
+Duas coisas que a tabela mostra e vale dizer em voz alta:
+
+1. **O 4B, que é o modelo de PC sem placa, ficou melhor que o 8B.** Já era assim no agente; repete-se
+   aqui. Modelo maior não é modelo melhor para instrução curta e obediente.
+2. **Sem modo, a resposta é de 3 a 10 vezes mais longa e erra mais.** O `curto` é o extremo: 202
+   letras sem modo contra **5 letras** com modo, ambos certos. O modo não deixa a IA mais inteligente:
+   deixa de gastar o seu tempo.
