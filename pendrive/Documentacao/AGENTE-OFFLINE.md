@@ -94,3 +94,34 @@ Opções: `--voltas N` (teto), `--mostrar` (diff do que mudou), `--modelo <gguf>
 8B, que insiste em criar função sem uso. O **1.7B não serve**: estraga o arquivo. Ressalva medida: os 4 s
 são **com placa de vídeo**; em PC sem placa o mesmo 4B roda a ~6 tokens/s, então espere minutos em vez de
 segundos — funciona, mas com paciência.
+
+## O limite, medido em projeto REAL (21/09/2026)
+
+Os quatro primeiros testes eram de brinquedo (1 a 3 arquivos). Repetimos numa cópia do **próprio
+PendriveIA**: 56 arquivos, 817 KB, com uma **regressão real replantada** (tirar a normalização de acento
+do medidor, que foi o defeito verdadeiro daquele dia). O teste que prova é
+`python Testes/avaliar-modos.py --parafrases`, que roda em 1 s e sai com código 1.
+
+**Nenhum dos modelos locais resolveu.** O que cada um fez:
+
+| Modelo | Comportamento no projeto real |
+|---|---|
+| Qwen3.5-4B | releu o mesmo arquivo 8 vezes, ignorou o aviso de repetição, e **inventou um nome de arquivo** ("avali de modos.py") |
+| Qwen3-8B | pior: **reescreveu um arquivo de 12 KB como 1,2 KB**, truncando o conteúdo e deixando erro de sintaxe |
+
+**Portanto: o agente serve para projeto pequeno com teste claro — 1 a 3 arquivos.** Em projeto real,
+com o modelo local, ele se perde. Isso não é falta de ferramenta: demos busca no projeto (grep),
+aviso de releitura e troca exata, e o modelo continuou rodando em círculo.
+
+### As duas travas que nasceram desse estrago
+
+1. **Recusa encolher arquivo.** Gravar conteúdo menor que 60% do tamanho atual (em arquivo acima de
+   2 KB) é **RECUSADO**: significa que o modelo não reproduziu o arquivo inteiro. Provado: tentativa de
+   escrever 19 bytes sobre 12.179 foi recusada e o arquivo ficou intacto.
+2. **`substituir_no_arquivo(caminho, de, para)`** — troca um trecho exato, e é o jeito certo de mexer em
+   arquivo grande. Recusa trecho que não existe e trecho que aparece mais de uma vez ("aparece 10
+   vezes. Mande um trecho maior"), em vez de trocar no lugar errado.
+
+E uma correção de rota que a medição exigiu no próprio medidor: as paráfrases do controle estavam
+**sem acento**, então não pegavam a regressão de acento. Reescritas com acento, como um modelo de
+verdade escreve, o controle passou a acusar (3/4 em vez de 4/4 falso).

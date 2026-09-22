@@ -25,6 +25,13 @@ FERRAMENTAS = [
      "description": "Grava o conteudo COMPLETO de um arquivo da pasta do projeto (o conteudo antigo e substituido)",
      "parameters": {"type": "object", "properties": {"caminho": {"type": "string"}, "conteudo": {"type": "string"}},
                     "required": ["caminho", "conteudo"]}}},
+    {"type": "function", "function": {"name": "buscar_no_projeto",
+     "description": "Procura um texto em todos os arquivos do projeto e devolve arquivo:linha:trecho. Use ANTES de ler arquivo grande.",
+     "parameters": {"type": "object", "properties": {"texto": {"type": "string"}}, "required": ["texto"]}}},
+    {"type": "function", "function": {"name": "substituir_no_arquivo",
+     "description": "Troca um trecho EXATO por outro dentro de um arquivo. Use SEMPRE isto em arquivo grande, em vez de reescrever tudo.",
+     "parameters": {"type": "object", "properties": {"caminho": {"type": "string"}, "de": {"type": "string"}, "para": {"type": "string"}},
+                    "required": ["caminho", "de", "para"]}}},
     {"type": "function", "function": {"name": "rodar_comando", "description": "Roda um comando na pasta do projeto e devolve a saida",
      "parameters": {"type": "object", "properties": {"comando": {"type": "string"}}, "required": ["comando"]}}},
 ]
@@ -36,6 +43,7 @@ class Projeto:
     def __init__(self, pasta):
         self.pasta = os.path.abspath(pasta)
         self.tocados = {}
+        self.lidos = set()
 
     def caminho(self, rel):
         p = os.path.abspath(os.path.join(self.pasta, rel))
@@ -44,17 +52,33 @@ class Projeto:
         return p
 
     def ler_arquivo(self, caminho):
+        # leu o mesmo arquivo 10 vezes em looping num projeto real: a repeticao enche o contexto e ele
+        # se perde. Na segunda vez, o conteudo NAO volta: volta um aviso.
+        if caminho in getattr(self, "lidos", set()):
+            return (f"AVISO: voce JA leu {caminho} nesta conversa. Use o que ja leu, ou use "
+                    "buscar_no_projeto para achar a linha, ou grave a correcao com escrever_arquivo.")
+        self.lidos = getattr(self, "lidos", set()) | {caminho}
         p = self.caminho(caminho)
         if not os.path.exists(p):
             return f"ERRO: {caminho} nao existe. Arquivos da pasta: " + ", ".join(sorted(os.listdir(self.pasta))[:30])
         return open(p, encoding="utf-8", errors="replace").read()[:20000]
 
+    def guardar(self, p):
+        if p not in self.tocados and os.path.exists(p):
+            shutil.copy2(p, p + ".antes")
+            self.tocados[p] = True
+
     def escrever_arquivo(self, caminho, conteudo):
         p = self.caminho(caminho)
-        if p not in self.tocados and os.path.exists(p):
-            shutil.copy2(p, p + ".antes")       # da para desfazer
-            self.tocados[p] = True
-        with open(p, "w", encoding="utf-8", newline="\n") as f:
+        # o 8B reescreveu um arquivo de 8,5 KB como 1,2 KB e deixou erro de sintaxe (medido 21/09/2026):
+        # modelo local nao reproduz arquivo grande. Encolher demais e RECUSADO.
+        if os.path.exists(p):
+            antigo = os.path.getsize(p)
+            if antigo > 2000 and len(conteudo.encode("utf-8")) < antigo * 0.6:
+                return (f"RECUSADO: isso encolheria {caminho} de {antigo} para {len(conteudo)} bytes, ou seja "
+                        "voce nao reproduziu o arquivo inteiro. Use substituir_no_arquivo para trocar so o trecho errado.")
+        self.guardar(p)
+        with open(p, "w", encoding="utf-8", newline=chr(10)) as f:
             f.write(conteudo)
         return f"gravado: {caminho} ({len(conteudo)} letras). Copia do anterior em {os.path.basename(p)}.antes"
 
@@ -63,6 +87,38 @@ class Projeto:
     # roda o agente roda com a SUA conta: so aponte --pasta para projeto que voce deixaria um script solto.
     PROIBIDO = ("..", "%userprofile%", "$env:", "c:\\users", "c:\\windows", "curl", "wget",
                 "invoke-webrequest", "start-bitstransfer", "net use", "reg ", "schtasks", "shutdown")
+
+    def buscar_no_projeto(self, texto):
+        achados = []
+        for pasta, dirs, arqs in os.walk(self.pasta):
+            dirs[:] = [d for d in dirs if d not in ("__pycache__", ".git", "node_modules")]
+            for arq in arqs:
+                if arq.endswith((".antes", ".png", ".jpg", ".gguf", ".zim", ".db", ".exe", ".dll")):
+                    continue
+                p = os.path.join(pasta, arq)
+                try:
+                    for n, linha in enumerate(open(p, encoding="utf-8", errors="replace"), 1):
+                        if texto.lower() in linha.lower():
+                            achados.append(f"{os.path.relpath(p, self.pasta)}:{n}: {linha.strip()[:160]}")
+                            if len(achados) >= 40:
+                                return chr(10).join(achados) + chr(10) + "(muitos achados; refine a busca)"
+                except Exception:
+                    pass
+        return chr(10).join(achados) if achados else f"nada encontrado para: {texto}"
+
+    def substituir_no_arquivo(self, caminho, de, para):
+        p = self.caminho(caminho)
+        if not os.path.exists(p):
+            return f"ERRO: {caminho} nao existe"
+        texto = open(p, encoding="utf-8", errors="replace").read()
+        n = texto.count(de)
+        if n == 0:
+            return "ERRO: nao achei esse trecho EXATO no arquivo. Use buscar_no_projeto e copie o trecho como ele esta."
+        if n > 1:
+            return f"ERRO: esse trecho aparece {n} vezes. Mande um trecho maior, que apareca uma vez so."
+        self.guardar(p)
+        open(p, "w", encoding="utf-8", newline=chr(10)).write(texto.replace(de, para, 1))
+        return f"trocado em {caminho} (1 lugar). Copia do anterior em {os.path.basename(p)}.antes"
 
     def rodar_comando(self, comando):
         baixo = comando.lower()
@@ -116,10 +172,12 @@ def falar(porta, chave, msgs):
 
 
 SISTEMA = """Voce e um programador que trabalha NESTA pasta, em portugues do Brasil.
-Voce TEM ferramentas: ler_arquivo, escrever_arquivo e rodar_comando. Use-as; nunca peca permissao e
+Voce TEM ferramentas: buscar_no_projeto, ler_arquivo, substituir_no_arquivo, escrever_arquivo e rodar_comando.
 nunca diga que vai fazer: faca chamando a ferramenta.
-Ordem de trabalho: 1) rode o comando de teste para VER o erro; 2) leia o arquivo culpado;
-3) grave o arquivo corrigido inteiro com escrever_arquivo; 4) rode o teste de novo para PROVAR.
+Ordem de trabalho: 1) rode o comando de teste para VER o erro; 2) use buscar_no_projeto com um
+pedaco da mensagem de erro para achar o arquivo e a linha; 3) leia o arquivo UMA vez;
+3) troque SO a linha errada com substituir_no_arquivo (escrever_arquivo so em arquivo pequeno, e com o
+conteudo COMPLETO); 4) rode o teste de novo para PROVAR.
 Regras: mude so o que causa a falha; nao toque no que ja passa; escreva o arquivo COMPLETO.
 NAO acrescente funcao, classe nem arquivo novo: conserte o que ja existe, no arquivo onde ele esta.
 Quando o teste passar, responda em uma linha: PRONTO: <o que era e o que voce mudou>."""
