@@ -199,7 +199,9 @@ $grupos = @(
         @("8", "Tornar PDF escaneado pesquisável (OCR)", "Ferramentas\NAPS2\NAPS2.Portable.exe"),
         @("9", "Guardar arquivos com senha (7-Zip)", "Ferramentas\7-Zip\7zFM.exe"),
         @("T", "Transcrever uma gravação (entrevista, aula, consulta), separando quem falou", ""),
-        @("C", "Conferir se o pendrive não estragou nenhum arquivo", "")) },
+        @("C", "Conferir se o pendrive não estragou nenhum arquivo", ""),
+        @("W", "Refazer a lista de conferência (depois de mudar arquivos do pendrive)", ""),
+        @("Y", "Backup do pendrive no Google Drive (pacotes conferidos)", "backup-drive.ps1")) },
     @{ Nome = "Pendrive"; Itens = @(
         @("F", "Cofre pessoal: abrir ou fechar (VeraCrypt)", "COFRE.cmd"),
         @("B", "Ver se há atualização de modelos e Wikipédia", "ATUALIZAR.cmd"),
@@ -263,6 +265,12 @@ function Invoke-Opcao($escolha) {
             else { & (Join-Path $PSScriptRoot "transcrever-audio.ps1") }
         }
         "C" { & (Join-Path $PSScriptRoot "conferir-pendrive.ps1") }
+        "W" { & (Join-Path $PSScriptRoot "conferir-pendrive.ps1") -Gerar }
+        "Y" {
+            Write-Linha "  O backup precisa dos programas do pendrive FECHADOS. Leva horas na primeira vez." Yellow
+            if ((Read-Host "  Continuar? (S/N)") -match "^[SsYy]") { & (Join-Path $root "backup-drive.ps1") }
+            else { Write-Linha "  Cancelado." }
+        }
         "I" { Start-Bat "ATIVAR-IA.cmd" }
         "L" { Start-Process -FilePath "notepad.exe" -ArgumentList "`"$(Join-Path $root 'LEIA-ME.md')`"" | Out-Null }
         # Comandos novos (19/09). Os de conversa ficam numa janela que não fecha sozinha.

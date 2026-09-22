@@ -125,3 +125,13 @@ aviso de releitura e troca exata, e o modelo continuou rodando em círculo.
 E uma correção de rota que a medição exigiu no próprio medidor: as paráfrases do controle estavam
 **sem acento**, então não pegavam a regressão de acento. Reescritas com acento, como um modelo de
 verdade escreve, o controle passou a acusar (3/4 em vez de 4/4 falso).
+
+## `--conferir`: ver antes de deixar mexer (22/09/2026)
+
+```powershell
+python Menu\agente.py --pasta C:\projeto --testar "python rodar-testes.py" --conferir "conserte"
+```
+Ele trabalha normalmente, mas **nada é gravado**: no fim lista o que faria, por exemplo
+`calculo.py: trocaria: return a - b -> return a + b`. Provado: depois de rodar com `--conferir`, o
+arquivo continuou com o defeito e nem a cópia `.antes` foi criada. Use isso na primeira vez que apontar
+o agente para uma pasta que te importa.

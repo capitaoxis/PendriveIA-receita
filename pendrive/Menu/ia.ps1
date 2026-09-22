@@ -206,6 +206,12 @@ function Perguntar([string]$q) {
         $blocos = [Collections.Generic.List[string]]::new()
         $chaves = (Curta "Extraia de 2 a 4 palavras-chave em portugues para buscar esta pergunta num indice de livros. Use o termo tecnico quando houver (ex.: largar a fralda = desfralde). Responda so as palavras, separadas por espaco, sem pontuacao.`n`nPergunta: $q") -replace '[^\p{L}\p{Nd} -]', ' '
         if ($chaves.Trim()) { Write-Host "[buscando tambem por: $($chaves.Trim())]" -ForegroundColor DarkGray }
+        # quais LIVROS falam do assunto: ajuda a saber se vale ler, e mostra a fonte antes da resposta
+        $listaLivros = (& $pyL $scL "--livros" $(if ($chaves.Trim()) { $chaves } else { $q }) | Out-String).Trim()
+        if ($listaLivros) {
+            Write-Host "[livros sobre o assunto]" -ForegroundColor DarkGray
+            ($listaLivros -split "`r?`n" | Select-Object -First 5) | ForEach-Object { Write-Host "  $_" -ForegroundColor DarkGray }
+        }
         foreach ($busca in @($chaves, $q)) {
             if (-not $busca.Trim()) { continue }
             foreach ($b in ((& $pyL $scL $busca | Out-String) -split "\r?\n\r?\n")) {

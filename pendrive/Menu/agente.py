@@ -40,9 +40,11 @@ FERRAMENTAS = [
 class Projeto:
     """Guarda a pasta e garante que nada saia dela."""
 
-    def __init__(self, pasta):
+    def __init__(self, pasta, somenteLeitura=False):
         self.pasta = os.path.abspath(pasta)
         self.tocados = {}
+        self.somenteLeitura = somenteLeitura
+        self.propostas = []
         self.lidos = set()
 
     def caminho(self, rel):
@@ -69,6 +71,9 @@ class Projeto:
             self.tocados[p] = True
 
     def escrever_arquivo(self, caminho, conteudo):
+        if self.somenteLeitura:
+            self.propostas.append((caminho, f"gravaria {len(conteudo)} letras"))
+            return "MODO CONFERIR: nada gravado. Anotei. Siga como se tivesse dado certo."
         p = self.caminho(caminho)
         # o 8B reescreveu um arquivo de 8,5 KB como 1,2 KB e deixou erro de sintaxe (medido 21/09/2026):
         # modelo local nao reproduz arquivo grande. Encolher demais e RECUSADO.
@@ -107,6 +112,9 @@ class Projeto:
         return chr(10).join(achados) if achados else f"nada encontrado para: {texto}"
 
     def substituir_no_arquivo(self, caminho, de, para):
+        if self.somenteLeitura:
+            self.propostas.append((caminho, "trocaria: " + de.strip()[:50] + " -> " + para.strip()[:50]))
+            return "MODO CONFERIR: nada gravado. Anotei. Siga como se tivesse dado certo."
         p = self.caminho(caminho)
         if not os.path.exists(p):
             return f"ERRO: {caminho} nao existe"
@@ -193,8 +201,9 @@ def main():
     ap.add_argument("--modelo", default="unsloth--Qwen3.5-4B-GGUF--Qwen3.5-4B-Q4_K_M.gguf")   # medido 21/09: 4 s e sem lixo; o 8B leva 9-14 s e cria funcao sem uso
     ap.add_argument("--desfazer", action="store_true")
     ap.add_argument("--mostrar", action="store_true")
+    ap.add_argument("--conferir", action="store_true", help="nao grava nada: mostra o que gravaria")
     a = ap.parse_args()
-    proj = Projeto(a.pasta)
+    proj = Projeto(a.pasta, somenteLeitura=a.conferir)
 
     if a.desfazer:
         n = 0
@@ -296,6 +305,11 @@ def main():
             print("AVISO: o agente ACRESCENTOU codigo novo (confira se e necessario):")
             for x in acrescentados:
                 print("  - " + x)
+        if proj.propostas:
+            print("")
+            print("MODO CONFERIR - o agente FARIA isto (nada foi gravado):")
+            for caminho, o_que in proj.propostas:
+                print(f"  - {caminho}: {o_que}")
         print(f"\narquivos tocados: {len(proj.tocados)} | {time.time() - t0:.0f}s"
               f"{' | desfaca com --desfazer' if proj.tocados else ''}")
         if passou is False:

@@ -131,3 +131,10 @@ Placar com temperatura 0 (determinístico), 18 casos + 2 controles:
    comportamento certo, e era reprovado. Agora o teste cobra o que importa: o nome **não pode aparecer**.
 
 Moral: quando o placar não bate com a leitura das respostas, **desconfie do medidor antes do modo**.
+
+## 22/09: o `curto` parou de piorar no modelo fraco
+Era o único modo que **piorava** o acerto no Qwen3-1.7B (3/3 sem modo, 2/3 com). Causa: pressionado a
+economizar, ele repetia o tema em vez de responder ("capital do Amazonas?" → "amazonas"). A regra nova
+diz isso na cara: *"se a pergunta tem resposta de uma palavra, escreva ESSA palavra; nunca repita o tema
+no lugar da resposta"*. Medido depois: **3/3 no 1.7B** (resposta de 6 letras contra 89 sem modo) e
+**3/3 no 4B** (5 letras contra 202).
