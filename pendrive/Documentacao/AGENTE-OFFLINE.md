@@ -135,3 +135,26 @@ Ele trabalha normalmente, mas **nada é gravado**: no fim lista o que faria, por
 `calculo.py: trocaria: return a - b -> return a + b`. Provado: depois de rodar com `--conferir`, o
 arquivo continuou com o defeito e nem a cópia `.antes` foi criada. Use isso na primeira vez que apontar
 o agente para uma pasta que te importa.
+
+## 22/09: o limite não é o TAMANHO do projeto, é a DIFICULDADE do defeito
+
+Antes eu havia concluído "não serve em projeto real". A conclusão estava **incompleta**. Separando as
+duas coisas no mesmo projeto de 56 arquivos:
+
+| Defeito plantado | A mensagem de erro aponta o culpado? | Resultado |
+|---|---|---|
+| Normalização de acento removida (a regressão real) | Não — o erro fala de "faltou nao medido" | ❌ nunca chegou no arquivo |
+| `radical()` devolvendo a palavra inteira | Sim — "ver função radical em Menu/livros-busca.py" | **achou o arquivo e a função certos** e trocou a linha certa; mas o conserto saiu errado (`p[:-1]` dá "queda", esperado "qued"), e com 26 voltas não se corrigiu |
+
+**Portanto: ele navega 56 arquivos sem problema quando o teste diz onde olhar.** O que ele não faz é
+o raciocínio: erra o conserto e depois insiste no mesmo erro. Em projeto grande, a qualidade da
+**mensagem de erro do seu teste** vale mais que o tamanho do projeto — teste que diz "esperado X, obtido
+Y, ver função Z" é o que transforma o agente em útil.
+
+### Ferramentas e travas acrescentadas nesta rodada
+- **`mapa_do_projeto`** (arquivos + funções com número de linha) e **`ler_trecho`** (40 linhas em volta
+  de uma linha): em projeto grande, ler arquivo inteiro enche o contexto.
+- **Poda do histórico**: resultado antigo de ferramenta vira uma linha. Contexto cheio de leitura velha
+  era parte do porquê de ele rodar em círculo.
+- **Disjuntor de círculo**: 3 chamadas idênticas e o agente para, em vez de queimar as voltas. (Na
+  primeira versão ele avisava mas não parava — a mensagem saía 5 vezes; corrigido e reconferido.)

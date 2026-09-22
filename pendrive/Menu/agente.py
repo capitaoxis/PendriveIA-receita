@@ -32,6 +32,13 @@ FERRAMENTAS = [
      "description": "Troca um trecho EXATO por outro dentro de um arquivo. Use SEMPRE isto em arquivo grande, em vez de reescrever tudo.",
      "parameters": {"type": "object", "properties": {"caminho": {"type": "string"}, "de": {"type": "string"}, "para": {"type": "string"}},
                     "required": ["caminho", "de", "para"]}}},
+    {"type": "function", "function": {"name": "mapa_do_projeto",
+     "description": "Lista os arquivos e, em cada um, as funcoes/classes com o numero da linha. Comece por aqui em projeto grande.",
+     "parameters": {"type": "object", "properties": {}}}},
+    {"type": "function", "function": {"name": "ler_trecho",
+     "description": "Le SO as linhas em volta de uma linha (40 antes e 40 depois). Use em arquivo grande, em vez de ler_arquivo.",
+     "parameters": {"type": "object", "properties": {"caminho": {"type": "string"}, "linha": {"type": "integer"}},
+                    "required": ["caminho", "linha"]}}},
     {"type": "function", "function": {"name": "rodar_comando", "description": "Roda um comando na pasta do projeto e devolve a saida",
      "parameters": {"type": "object", "properties": {"comando": {"type": "string"}}, "required": ["comando"]}}},
 ]
@@ -128,6 +135,35 @@ class Projeto:
         open(p, "w", encoding="utf-8", newline=chr(10)).write(texto.replace(de, para, 1))
         return f"trocado em {caminho} (1 lugar). Copia do anterior em {os.path.basename(p)}.antes"
 
+    def mapa_do_projeto(self):
+        linhas = []
+        for pasta, dirs, arqs in os.walk(self.pasta):
+            dirs[:] = [d for d in dirs if d not in ("__pycache__", ".git", "node_modules")]
+            for arq in sorted(arqs):
+                if arq.endswith(".antes"):
+                    continue
+                p = os.path.join(pasta, arq)
+                rel = os.path.relpath(p, self.pasta)
+                try:
+                    conteudo = open(p, encoding="utf-8", errors="replace").readlines()
+                except Exception:
+                    continue
+                defs = [f"{n}:{l.strip()[:70]}" for n, l in enumerate(conteudo, 1)
+                        if l.startswith(("def ", "class ", "function ")) or l.lstrip().startswith(("def ", "class "))]
+                linhas.append(f"{rel} ({len(conteudo)} linhas)" + ("  -> " + "; ".join(defs[:12]) if defs else ""))
+                if len(linhas) >= 80:
+                    break
+        return chr(10).join(linhas)
+
+    def ler_trecho(self, caminho, linha):
+        p = self.caminho(caminho)
+        if not os.path.exists(p):
+            return f"ERRO: {caminho} nao existe"
+        conteudo = open(p, encoding="utf-8", errors="replace").readlines()
+        ini, fim = max(0, int(linha) - 41), min(len(conteudo), int(linha) + 40)
+        corpo = "".join(f"{n}: {l}" for n, l in enumerate(conteudo[ini:fim], ini + 1))
+        return f"{caminho} linhas {ini+1}-{fim} de {len(conteudo)}:" + chr(10) + corpo[:8000]
+
     def rodar_comando(self, comando):
         baixo = comando.lower()
         for termo in self.PROIBIDO:
@@ -170,6 +206,18 @@ def subir_modelo(modelo, porta):
     return None, None
 
 
+def podar(msgs, manter=8):
+    """Mantem o sistema, o pedido e as ultimas mensagens; resultado antigo de ferramenta vira resumo."""
+    if len(msgs) <= manter + 2:
+        return msgs
+    novas = msgs[:2]
+    for m in msgs[2:-manter]:
+        if m.get("role") == "tool":
+            novas.append({**m, "content": "[resultado antigo: " + str(m.get("content", ""))[:80] + "...]"})
+        else:
+            novas.append(m)
+    return novas + msgs[-manter:]
+
 def falar(porta, chave, msgs):
     corpo = json.dumps({"model": "modelo", "messages": msgs, "tools": FERRAMENTAS, "tool_choice": "auto",
                         "temperature": 0, "max_tokens": 1500}).encode()
@@ -180,11 +228,14 @@ def falar(porta, chave, msgs):
 
 
 SISTEMA = """Voce e um programador que trabalha NESTA pasta, em portugues do Brasil.
-Voce TEM ferramentas: buscar_no_projeto, ler_arquivo, substituir_no_arquivo, escrever_arquivo e rodar_comando.
+Voce TEM ferramentas: mapa_do_projeto, buscar_no_projeto, ler_trecho, ler_arquivo,
+substituir_no_arquivo, escrever_arquivo e rodar_comando.
 nunca diga que vai fazer: faca chamando a ferramenta.
-Ordem de trabalho: 1) rode o comando de teste para VER o erro; 2) use buscar_no_projeto com um
+Ordem de trabalho: 1) rode o comando de teste para VER o erro; 2) mapa_do_projeto para ver a estrutura;
+3) buscar_no_projeto com um pedaco da mensagem de erro para achar arquivo e linha; 4) ler_trecho naquela linha;
 pedaco da mensagem de erro para achar o arquivo e a linha; 3) leia o arquivo UMA vez;
-3) troque SO a linha errada com substituir_no_arquivo (escrever_arquivo so em arquivo pequeno, e com o
+5) troque SO o trecho errado com substituir_no_arquivo; 6) rode o teste de novo para PROVAR.
+Em arquivo grande NAO use ler_arquivo nem escrever_arquivo: use ler_trecho e substituir_no_arquivo.
 conteudo COMPLETO); 4) rode o teste de novo para PROVAR.
 Regras: mude so o que causa a falha; nao toque no que ja passa; escreva o arquivo COMPLETO.
 NAO acrescente funcao, classe nem arquivo novo: conserte o que ja existe, no arquivo onde ele esta.
@@ -239,9 +290,11 @@ def main():
         tarefa += f"\nComando de teste (rode-o com rodar_comando): {a.testar}"
     msgs = [{"role": "system", "content": SISTEMA}, {"role": "user", "content": tarefa}]
     t0 = time.time()
+    repetidas = {}
+    emCirculo = False
     try:
         for volta in range(1, a.voltas + 1):
-            m = falar(porta, chave, msgs)
+            m = falar(porta, chave, podar(msgs))
             if not m.get("tool_calls"):
                 fala = (m.get("content") or "").strip()
                 # a palavra do agente nao encerra o trabalho: em 2 de 4 testes ele disse PRONTO sem
@@ -257,6 +310,7 @@ def main():
                         continue
                 print(f"[volta {volta}] {fala[:400]}")
                 break
+
             msgs.append(m)
             for chamada in m["tool_calls"]:
                 nome = chamada["function"]["name"]
@@ -268,9 +322,18 @@ def main():
                     resposta = getattr(proj, nome)(**args)
                 except Exception as e:
                     resposta = f"ERRO: {type(e).__name__}: {e}"
+                assinatura = nome + "|" + json.dumps(args, sort_keys=True)[:200]
+                repetidas[assinatura] = repetidas.get(assinatura, 0) + 1
+                if repetidas[assinatura] >= 3:
+                    print(f"[volta {volta}] o modelo repetiu {nome} 3 vezes com o mesmo argumento: entrou em circulo. Parando.")
+                    msgs.append({"role": "tool", "tool_call_id": chamada.get("id", str(volta)), "content": "PARANDO: circulo."})
+                    emCirculo = True
+                    break
                 resumo = str(args.get("comando") or args.get("caminho") or "")[:60]
                 print(f"[volta {volta}] {nome}({resumo}) -> {resposta.splitlines()[0][:90] if resposta else ''}", flush=True)
                 msgs.append({"role": "tool", "tool_call_id": chamada.get("id", str(volta)), "content": resposta[:6000]})
+            if emCirculo:
+                break
         # a palavra do agente nao vale: quem diz se resolveu e o teste
         passou = None
         if a.testar:
