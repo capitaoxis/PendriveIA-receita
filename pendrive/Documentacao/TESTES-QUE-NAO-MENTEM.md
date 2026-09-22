@@ -55,3 +55,36 @@ Antes de desconfiar do que a trava exige, confira **onde** ela olha:
 Os defeitos **reais** daquele dia — dos dois lados — só apareceram quando se parou de ler e se
 **executou**: uma tela de teste real, um comando rodando, uma resposta de modelo de verdade. `grep`
 confere texto, não comportamento.
+
+
+## A barra invertida comida, e a trava que nasceu dela (22/09/2026)
+
+Escrever arquivo por heredoc ou por string come a barra invertida e deixa um **byte de controle** no
+lugar. Aconteceu **quatro vezes** e nenhuma delas deu erro:
+
+| onde | o que virou | consequencia |
+|---|---|---|
+| regex do medidor (21/09) | `\b` -> 0x08 | trava mais frouxa do que parecia |
+| `Documentacao\MODOS-IA.md` | `\a` -> 0x07 | a linha ficou `Testesavaliar-modos.py`: **quem copiasse rodaria comando com nome errado** |
+| skill `pendrive-voz` (2 copias) | `\v` -> 0x0b | caminho do modelo de voz virou `diarizacao\x0boz.onnx` |
+| casos do modo `commit` (22/09) | `\b` -> 0x08 | `\bchore\b` virou `0x08chore0x08`, que **nunca casa**: a proibicao estava MORTA e o 3/3 do modo saiu de trava cega |
+
+O perigo nao e o erro, e a **ausencia** de erro: o arquivo continua valido, o Python compila, o Markdown
+renderiza, e o comando documentado nao existe.
+
+### `Testes\conferir-bytes-de-controle.py`
+
+```
+python Testes\conferir-bytes-de-controle.py
+```
+
+Varre `Menu`, `Testes`, `Documentacao` e os arquivos soltos da raiz (93 arquivos hoje) procurando byte
+menor que 32 fora de tab/LF/CR. Sai **1** se achar, e imprime o arquivo e qual byte.
+
+**Tem controle embutido, e e o que faz ela valer:** antes de varrer, ela **planta um 0x08** num arquivo
+temporario e confere que a propria varredura o acusa. Se nao acusar, sai com codigo **2** e diz
+"A VARREDURA ESTA CEGA". Sem isso, uma varredura quebrada imprimiria "nenhum byte de controle" para
+sempre - exatamente o tipo de verde falso que ja nos custou um dia de trabalho.
+
+Os `logo.txt` do JASP ficam de fora de proposito: usam 0x1b para dar cor no terminal, sao legitimos e
+nao sao nossos.

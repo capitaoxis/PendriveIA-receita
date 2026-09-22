@@ -24,6 +24,9 @@ ia -d mestrado -modo relatorio "resuma o capítulo 2"   # nos Documentos também
 | `curto` | resposta direta, no máximo 6 linhas, número e comando exatos | introdução, resumo da pergunta, oferta de ajuda extra |
 | `mestrado` | desenho do estudo e o que ele NÃO permite concluir, "[referencia a buscar: X]", "O QUE FALTA" | citação `(SOBRENOME, ano)` de referência que não está no material, p-valor inventado |
 | `laudo` | relato / medido / conclusão com "(hipótese)" / "CONFERIR ANTES DE ASSINAR", aviso de LGPD | CID, dose, exame ou data inventados, promessa de resultado, nome do paciente quando cabe a inicial |
+| `revisar` | crítica só com o CENÁRIO que quebra, a linha `ENTRADAS:` com vazio/zero/negativo/nulo/inexistente, o que foi acrescentado sem pedido | absolver sem passar a lista de entradas, reescrever em vez de apontar, crítica de gosto |
+| `commit` | 1ª linha com verbo no presente e até 72 letras, o efeito para quem usa, o número medido, aviso quando o diff mistura coisas sem relação | "atualiza arquivos", "vários ajustes", prefixo em inglês, número inventado |
+| `investigar` | separar OBSERVADO de suposto, 2-3 causas com a mais barata de descartar primeiro, uma MEDIDA por causa, o que falta saber | entregar código corrigido, "reinstale" ou "limpe o cache" sem medida |
 
 ## Medido, não achado
 
@@ -95,7 +98,7 @@ Recomendacao pratica:
 - Em PC com placa (Qwen3-8B): use os modos livremente, inclusive o `curto`.
 - Em PC sem placa (Qwen3-1.7B): use `relatorio`, `ideia`, `mestrado` e `laudo`; **evite o `curto`** e
   desconfie do `codar`, que cai para 1/3. Para pergunta de fato (data, nome, comando), prefira sem modo.
-- Rodar o medidor em outro PC: `python Testesvaliar-modos.py --modelo <arquivo .gguf>`.
+- Rodar o medidor em outro PC: `python Testes\avaliar-modos.py --modelo <arquivo .gguf>`.
 
 ## 21/09 (tarde): 17/18 no 8B e 15/18 no leve — e tres defeitos do MEDIDOR
 
@@ -138,3 +141,41 @@ economizar, ele repetia o tema em vez de responder ("capital do Amazonas?" → "
 diz isso na cara: *"se a pergunta tem resposta de uma palavra, escreva ESSA palavra; nunca repita o tema
 no lugar da resposta"*. Medido depois: **3/3 no 1.7B** (resposta de 6 letras contra 89 sem modo) e
 **3/3 no 4B** (5 letras contra 202).
+
+
+## Os três modos que saíram das skills instaladas (22/09/2026)
+
+`revisar`, `commit` e `investigar` nasceram da triagem das 729 skills (veja
+`TRIAGEM-DAS-SKILLS.md`): de cada skill útil ficou só a regra conferível, em menos de 180 palavras.
+
+| modo | Qwen3-8B sem → com | Qwen3.5-4B sem → com |
+|---|---|---|
+| `revisar` | 3/3 → **3/3**, resposta 35% menor (328 → 213 letras) | 2/3 → **3/3** |
+| `commit` | 2/3 → **3/3** | 2/3 → **3/3** |
+
+> O placar do `commit` saiu **duas vezes**: a primeira com a trava cega (a proibição de `\bchore\b`
+> tinha a barra comida por um 0x08 e nunca podia casar) e a segunda depois do conserto. **Deu o mesmo
+> 3/3** — mas isso foi sorte, não método: o byte comido estava numa proibição, e o caso que decide o
+> placar é outro. Se não tivesse batido, eu teria publicado melhoria que não existia.
+
+### O achado que vale mais que os três modos: formato rígido SUBSTITUI raciocínio
+
+A primeira versão do `revisar` mandava responder em três linhas fixas
+(`QUEBRA:` / `SOBRA:` / `MAIS SIMPLES:`) e dizia "se está bom, escreva *nada que quebre*".
+Resultado medido no Qwen3-8B, com a pergunta `def media(l): return sum(l)/len(l)`:
+
+- **com** o modo: `QUEBRA: nada / SOBRA: nada / MAIS SIMPLES: esta simples` — 55 letras, e **absolveu a
+  divisão por zero**;
+- **sem** modo nenhum: achou a lista vazia, explicou e mostrou duas formas de consertar.
+
+O molde virou formulário para preencher, não caminho para pensar. Duas lições:
+
+1. **Não dê a frase de absolvição pronta.** Regra que convida ("escreva *nada que quebre*"), o modelo
+   aceita o convite - é a mesma família de "regra que convida faz o modelo inventar".
+2. **Instrução que não aparece na saída, o modelo pula.** A correção foi obrigar a checagem a ocupar uma
+   linha da resposta (`ENTRADAS: vazio=...; zero=...; nulo=...`) e exigir que o `QUEBRA:` fosse tirado
+   dali. Aí o 8B foi para 3/3. Se o cumprimento não é visível na resposta, você mede obediência ao
+   formato, não ao conteúdo.
+
+E isso só apareceu porque **todo modo é medido contra "sem modo"**. Comparado com a minha expectativa, o
+modo parecia ótimo: curto, organizado, no formato pedido. Contra o controle, era uma piora.

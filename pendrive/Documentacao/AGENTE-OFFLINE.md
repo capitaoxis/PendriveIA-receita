@@ -45,12 +45,33 @@ $env:OPENAI_MODEL    = "qwen3"
 openclaude --print "rode X, ache a causa, corrija e prove com o teste"
 ```
 
-## Estado
+## Estado: FUNCIONANDO no pendrive, tecla R (22/09/2026)
 
-**Não instalado no pendrive.** O teste ficou em `C:\Users\Pichau\teste-openclaude` (25 KB, mais o
-pacote npm global). A execução do agente em si foi **bloqueada pelo ambiente** do Claude Code
-("criar agente não confiável"), então o que está provado é a parte do modelo — que era a parte
-incerta. Rodar o agente de ponta a ponta depende de liberar essa permissão.
+O openclaude esta instalado (`Ferramentas\openclaude`) e abre pela **tecla R** do menu, ou por
+`Menu\openclaude.ps1 -Pasta C:\projeto`. O atalho sobe o modelo do pendrive e aponta o openclaude para
+ele: **sem internet e sem chave de API**.
+
+| O que | Funciona? |
+|---|---|
+| Conversar sobre o projeto, ler arquivo | sim |
+| **Editar** arquivo (Edit) | sim, provado: trocou `return a - b` por `return a + b` |
+| Rodar comando (Bash) | **nao** neste Windows: falha com "unknown error". Para agente que roda o teste sozinho, use a **tecla G** (`agente.py`) |
+
+### As cinco coisas sem as quais ele NAO trabalha (cada uma custou um teste)
+
+1. **`CLAUDE_CODE_GIT_BASH_PATH`** — no Windows ele exige o Git Bash e o deduz do caminho do `git`;
+   achando o git do mingw64 monta um caminho inexistente e a ferramenta de terminal morre.
+2. **Contexto 40960.** Com 16k o prompt de sistema dele nao cabe, o modelo se perde e fica **pedindo
+   permissao** em vez de trabalhar.
+3. **`--permission-mode acceptEdits`.** O padrao (`dontAsk`) **nega** toda edicao: ele diagnostica e nao
+   conserta - foi isso que pareceu, por dois dias, "incapacidade do modelo".
+4. **`--bare`.** Sem isso vem o prompt de sistema inteiro do Claude Code; o modelo local afoga nele e
+   **conversa em vez de agir**. Com `--bare`, age.
+5. **Caminho ABSOLUTO em toda ferramenta de arquivo.** O modelo local manda `calculo.py` e a edicao
+   falha com NotFound - tres vezes seguidas. O atalho avisa isso no prompt.
+
+Modelo: **nunca o "de codigo"** (Qwen2.5-Coder nao chama ferramenta). O atalho troca sozinho para o
+Qwen3-8B se o diagnostico apontar o Coder.
 
 ## O que fizemos no lugar: `Menu\agente.py` (21/09/2026)
 
